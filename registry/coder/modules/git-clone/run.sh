@@ -40,7 +40,11 @@ if [ -n "$PRE_CLONE_SCRIPT" ]; then
   PRE_CLONE_TMP=$(mktemp)
   echo "$PRE_CLONE_SCRIPT" | base64 -d > "$PRE_CLONE_TMP"
   chmod +x "$PRE_CLONE_TMP"
-  $PRE_CLONE_TMP
+  if ! "$PRE_CLONE_TMP"; then
+    rm "$PRE_CLONE_TMP"
+    echo "Pre-clone script failed!"
+    exit 1
+  fi
   rm "$PRE_CLONE_TMP"
 fi
 
@@ -73,6 +77,10 @@ if [ -n "$POST_CLONE_SCRIPT" ]; then
   echo "$POST_CLONE_SCRIPT" | base64 -d > "$POST_CLONE_TMP"
   chmod +x "$POST_CLONE_TMP"
   cd "$CLONE_PATH" || exit
-  $POST_CLONE_TMP
+  if ! "$POST_CLONE_TMP"; then
+    rm "$POST_CLONE_TMP"
+    echo "Post-clone script failed!"
+    exit 1
+  fi
   rm "$POST_CLONE_TMP"
 fi
